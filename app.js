@@ -11,17 +11,15 @@ document.addEventListener('click', (event) => {
   const type = event.target.dataset.type;
 
   if (type === 'lock') {
-    console.log('perform lock');
-    console.log(event.target);
+    const node = event.target.tagName.toLowerCase() === 'i'
+      ? event.target
+      : event.target.children[0]
 
-    if (type === 'lock') {
-      const node = event.target.tagName.toLowerCase() === 'i'
-        ? event.target
-        : event.target.children[0]
-
-      node.classList.toggle('fa-lock-open');
-      node.classList.toggle('fa-lock');
-    }
+    node.classList.toggle('fa-lock-open');
+    node.classList.toggle('fa-lock');
+  } else if (type === 'сopy') {
+    console.log('Вы скопировали текст');
+    copyToClickboard(event.target.textContent);
   }
 })
 
@@ -35,6 +33,11 @@ document.addEventListener('click', (event) => {
 //   }
 //   return '#' + color
 // };
+
+// копирование в буфер обмена названия цвета
+function copyToClickboard(text) {
+  navigator.clipboard.writeText(text)
+}
 
 // установка случайного цвета в колонку
 function setRandomColors() {
