@@ -40,18 +40,34 @@ function copyToClickboard(text) {
 }
 
 // установка случайного цвета в колонку
-function setRandomColors() {
-  cols.forEach((col) => {
+function setRandomColors(isInitial) {
+  // если это первоначалбная загрузка то забираем цвета их хэша а иначе это будет пустой массив
+  const colors = isInitial ? getColorsFromHash() : [];
+
+  cols.forEach((col, index) => {
     // определяем заблокирована ли колонка
     const isLocked = col.querySelector('i')
       .classList.contains('fa-lock');
-
     const text = col.querySelector('h2');
     const button = col.querySelector('button');
-    const color = chroma.random();
 
     if (isLocked) {
+      colors.push(text.textContent)
       return;
+    }
+
+    // генераия цвета
+    // если это первичная загрузка то нужно получить цвета не рандомно а из массива colors
+    const color = isInitial
+      ? colors[index]
+        // если существует то используем из массиа, если нет то генерируем
+        ? colors[index]
+        : chroma.random()
+      : chroma.random();
+
+    // добавлять цвет в массив только в том сле=учае если это не первоначальная загрузка
+    if (!isInitial) {
+      colors.push(color);
     }
 
     text.textContent = color;
@@ -60,6 +76,8 @@ function setRandomColors() {
     setTextColor(text, color);
     setTextColor(button, color);
   })
+
+  updateColorsHash(colors);
 };
 
 function setTextColor(text, color) {
@@ -67,4 +85,24 @@ function setTextColor(text, color) {
   text.style.color = luminance > 0.5 ? 'black' : 'white';
 }
 
-setRandomColors();
+function updateColorsHash(colors = []) {
+  document.location.hash = colors
+    .map((col) => {
+      return col.toString().substring(1)
+    })
+    .join('-');
+}
+
+function getColorsFromHash() {
+  // проверка есть ли в хэше данные кроме решетки
+  if (document.location.hash.length > 1) {
+    // список всех цветов, но без первой решетки. И к каждому добавляем свою решетку
+    return document.location.hash
+      .substring(1)
+      .split('-')
+      .map(color => '#' + color)
+  }
+  return []
+}
+
+setRandomColors(true);
